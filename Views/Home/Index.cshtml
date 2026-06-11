@@ -1,0 +1,659 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VetConnect - HUD Holográfico</title>
+    
+    <!-- Sci-Fi HUD Stylesheet -->
+    <link rel="stylesheet" href="~/css/neon.css" asp-append-version="true" />
+</head>
+<body>
+
+    <!-- CRT Visual effects -->
+    <div class="crt-overlay"></div>
+    <div class="crt-scanline"></div>
+
+    <!-- Interactive Neon Particle Canvas -->
+    <canvas id="hud-canvas"></canvas>
+
+    <!-- Corner HUD brackets -->
+    <div class="hud-frame frame-tl"></div>
+    <div class="hud-frame frame-tr"></div>
+    <div class="hud-frame frame-bl"></div>
+    <div class="hud-frame frame-br"></div>
+
+    <!-- HUD Telemetry text -->
+    <div class="hud-telemetry telemetry-left">SYSTEM STATUS: NOMINAL // GRID ACTIVE</div>
+    <div class="hud-telemetry telemetry-right">VET-CORE MODULE v4.81 // SECURE CONNECT</div>
+
+    <!-- Main Container -->
+    <div class="hud-container">
+        
+        <!-- The Central Hologram Hub -->
+        <div class="hud-display">
+            
+            <!-- Rotating Sci-Fi Rings -->
+            <div class="hud-ring ring-outer"></div>
+            <div class="hud-ring ring-mid"></div>
+            <div class="hud-ring ring-inner"></div>
+
+            <!-- SVG Glowing Circuit Connections -->
+            <svg class="hud-connections" viewBox="0 0 650 650">
+                <!-- Vets connection (Top-Left) -->
+                <path id="path-vets" class="hud-path" d="M 325 325 L 180 100 L 120 100" />
+                <path id="path-vets-glow" class="hud-path-glow" d="M 325 325 L 180 100 L 120 100" stroke="var(--neon-cyan)" />
+                
+                <!-- Citas connection (Top-Right) -->
+                <path id="path-citas" class="hud-path" d="M 325 325 L 470 100 L 530 100" />
+                <path id="path-citas-glow" class="hud-path-glow" d="M 325 325 L 470 100 L 530 100" stroke="var(--neon-violet)" />
+                
+                <!-- Mascotas connection (Bottom) -->
+                <path id="path-mascotas" class="hud-path" d="M 325 325 L 325 500" />
+                <path id="path-mascotas-glow" class="hud-path-glow" d="M 325 325 L 325 500" stroke="var(--neon-pink)" />
+            </svg>
+
+            <!-- Reactor Core (Center) -->
+            <div class="hud-core" id="reactorCore">
+                <svg viewBox="0 0 24 24" class="hud-core-logo" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                    <path d="M12 5v6" />
+                    <path d="M9 8h6" />
+                </svg>
+            </div>
+
+            <!-- Interactive Buttons -->
+            <!-- Button 1: VETERINARIAS (Top-Left) -->
+            <button class="hud-btn pos-vets theme-cyan" 
+                    onclick="location.href='@Url.Action("Index", "Veterinario")'"
+                    onmouseenter="focusNode('vets', 'cyan')" 
+                    onmouseleave="blurNode('vets')">
+                <div class="hud-btn-icon-wrapper">
+                    <svg viewBox="0 0 24 24" class="hud-btn-icon" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                        <path d="M12 5v6" />
+                        <path d="M9 8h6" />
+                    </svg>
+                </div>
+                <span class="hud-btn-title">VETERINARIAS</span>
+            </button>
+
+            <!-- Button 2: CITAS (Top-Right) -->
+            <button class="hud-btn pos-citas theme-violet" 
+                    onclick="location.href='@Url.Action("Index", "Citas")'"
+                    onmouseenter="focusNode('citas', 'violet')" 
+                    onmouseleave="blurNode('citas')">
+                <div class="hud-btn-icon-wrapper">
+                    <svg viewBox="0 0 24 24" class="hud-btn-icon" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                        <circle cx="12" cy="16" r="3" />
+                        <polyline points="12 15 12 16 13 17" />
+                    </svg>
+                </div>
+                <span class="hud-btn-title">CITAS</span>
+            </button>
+
+            <button class="hud-btn pos-mascotas theme-pink" 
+                    onclick="location.href='@Url.Action("Index", "Mascota")'"
+                    onmouseenter="focusNode('mascotas', 'pink')" 
+                    onmouseleave="blurNode('mascotas')">
+                <div class="hud-btn-icon-wrapper">
+                    <svg viewBox="0 0 24 24" class="hud-btn-icon" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 13c-1.657 0-3 1.343-3 3 0 1.657 1.343 3 3 3s3-1.343 3-3c0-1.657-1.343-3-3-3z" />
+                        <circle cx="8" cy="9" r="1.5" />
+                        <circle cx="16" cy="9" r="1.5" />
+                        <circle cx="12" cy="7" r="1.5" />
+                        <circle cx="6" cy="12" r="1.5" />
+                        <circle cx="18" cy="12" r="1.5" />
+                    </svg>
+                </div>
+                <span class="hud-btn-title">MASCOTAS</span>
+            </button>
+
+        </div>
+
+        <!-- Footer / Sound Settings -->
+        <footer class="hud-footer">
+            <button class="hud-sound-toggle" onclick="toggleAudioState()" id="soundToggleBtn">
+                AUDIO: OFF
+            </button>
+        </footer>
+
+    </div>
+
+    <!-- ==============================================
+         MODAL 1: VETERINARIAS (CYAN THEME)
+         ============================================== -->
+    <div class="modal-overlay" id="modal-veterinarias" style="--theme-color: var(--neon-cyan); --theme-glow: var(--neon-cyan-glow);">
+        <div class="modal-wrapper">
+            <button class="modal-close-btn" onclick="closeModal('veterinarias')">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <h3 class="modal-title" style="color: var(--neon-cyan)">Sucursales</h3>
+                </div>
+                <div class="modal-tabs">
+                    <button class="modal-tab active" onclick="switchTab('veterinarias', 'list')">Lista</button>
+                    <button class="modal-tab" onclick="switchTab('veterinarias', 'add')">Añadir</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="tab-content active" id="tab-veterinarias-list">
+                    <div class="list-container" id="vet-list-container">
+                        <div class="item-card">
+                            <div class="item-info">
+                                <span class="item-name">Centro Veterinario Norte</span>
+                                <span class="item-meta">Av. Patria #1209, Zopopan</span>
+                            </div>
+                            <span class="item-status-tag tag-cyan">24H</span>
+                        </div>
+                        <div class="item-card">
+                            <div class="item-info">
+                                <span class="item-name">Clínica Metropolitana</span>
+                                <span class="item-meta">Calzada Independencia #88</span>
+                            </div>
+                            <span class="item-status-tag tag-cyan" style="opacity: 0.7;">08-20h</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-content" id="tab-veterinarias-add">
+                    <form class="neon-form" id="add-vet-form" onsubmit="handleNewVet(event)">
+                        <div class="form-group">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-input" required id="vet-name-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Dirección</label>
+                            <input type="text" class="form-input" required id="vet-address-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Horario</label>
+                            <select class="form-input" id="vet-schedule-input">
+                                <option value="24H">24 Horas</option>
+                                <option value="08-20h">08:00 AM - 08:00 PM</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="form-submit-btn">Aceptar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================================
+         MODAL 2: CITAS (VIOLET THEME)
+         ============================================== -->
+    <div class="modal-overlay" id="modal-citas" style="--theme-color: var(--neon-violet); --theme-glow: var(--neon-violet-glow);">
+        <div class="modal-wrapper">
+            <button class="modal-close-btn" onclick="closeModal('citas')">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <h3 class="modal-title" style="color: var(--neon-violet)">Agenda de Citas</h3>
+                </div>
+                <div class="modal-tabs">
+                    <button class="modal-tab active" onclick="switchTab('citas', 'list')">Citas</button>
+                    <button class="modal-tab" onclick="switchTab('citas', 'add')">Nueva</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="tab-content active" id="tab-citas-list">
+                    <div class="list-container" id="appointment-list-container">
+                        <div class="item-card">
+                            <div class="item-info">
+                                <span class="item-name">Toby (Perro) - Vacuna</span>
+                                <span class="item-meta">Mañana - 10:00 AM // Dr. Ramírez</span>
+                            </div>
+                            <span class="item-status-tag tag-violet">Puntual</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-content" id="tab-citas-add">
+                    <form class="neon-form" id="add-appointment-form" onsubmit="handleNewAppointment(event)">
+                        <div class="form-group">
+                            <label class="form-label">Mascota</label>
+                            <select class="form-input" id="appt-pet-input">
+                                <option value="Toby (Perro)">Toby (Perro)</option>
+                                <option value="Luna (Gato)">Luna (Gato)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Médico</label>
+                            <input type="text" class="form-input" required id="appt-doctor-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Fecha / Hora</label>
+                            <input type="datetime-local" class="form-input" required id="appt-date-input">
+                        </div>
+                        <button type="submit" class="form-submit-btn">Agendar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================================
+         MODAL 3: MASCOTAS (PINK THEME)
+         ============================================== -->
+    <div class="modal-overlay" id="modal-mascotas" style="--theme-color: var(--neon-pink); --theme-glow: var(--neon-pink-glow);">
+        <div class="modal-wrapper">
+            <button class="modal-close-btn" onclick="closeModal('mascotas')">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <h3 class="modal-title" style="color: var(--neon-pink)">Pacientes</h3>
+                </div>
+                <div class="modal-tabs">
+                    <button class="modal-tab active" onclick="switchTab('mascotas', 'list')">Registro</button>
+                    <button class="modal-tab" onclick="switchTab('mascotas', 'add')">Nueva</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="tab-content active" id="tab-mascotas-list">
+                    <div class="list-container" id="pet-list-container">
+                        <div class="item-card">
+                            <div class="item-info">
+                                <span class="item-name">Toby</span>
+                                <span class="item-meta">Golden Retriever - 3 Años</span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: 95%; background-color: var(--neon-cyan); box-shadow: 0 0 8px var(--neon-cyan);"></div>
+                            </div>
+                        </div>
+                        <div class="item-card">
+                            <div class="item-info">
+                                <span class="item-name">Luna</span>
+                                <span class="item-meta">Gato Persa - 2 Años</span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: 80%; background-color: var(--neon-violet); box-shadow: 0 0 8px var(--neon-violet);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-content" id="tab-mascotas-add">
+                    <form class="neon-form" id="add-pet-form" onsubmit="handleNewPet(event)">
+                        <div class="form-group">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-input" required id="pet-name-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Raza</label>
+                            <input type="text" class="form-input" required id="pet-breed-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Edad (Años)</label>
+                            <input type="number" class="form-input" required id="pet-age-input">
+                        </div>
+                        <button type="submit" class="form-submit-btn">Registrar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================================
+         JAVASCRIPT CODE
+         ============================================== -->
+    <script>
+        // Web Audio Synthesizer (Holographic Audio Theme)
+        let audioCtx = null;
+        let soundEnabled = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function toggleAudioState() {
+            initAudio();
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('soundToggleBtn');
+            if (soundEnabled) {
+                btn.textContent = "AUDIO: ON";
+                btn.style.borderColor = "var(--neon-cyan)";
+                btn.style.color = "#fff";
+                playSystemBeep(1200, 0.08, 'sine');
+            } else {
+                btn.textContent = "AUDIO: OFF";
+                btn.style.borderColor = "";
+                btn.style.color = "";
+            }
+        }
+
+        function playSystemBeep(frequency, duration, type = 'sine') {
+            if (!soundEnabled || !audioCtx) return;
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = type;
+                osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.015, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+        
+        // Holographic connection line animation triggers
+        let currentStrokeRgb = { r: 255, g: 255, b: 255 };
+
+        function parseColorToRgb(colorStr) {
+            if (!colorStr) return { r: 255, g: 255, b: 255 };
+            const clean = colorStr.trim().toLowerCase();
+            
+            // Match rgb(r, g, b) or rgba(r, g, b, a)
+            if (clean.startsWith('rgb')) {
+                const matches = clean.match(/\d+/g);
+                if (matches && matches.length >= 3) {
+                    return {
+                        r: parseInt(matches[0]),
+                        g: parseInt(matches[1]),
+                        b: parseInt(matches[2])
+                    };
+                }
+            }
+            
+            // Match hex #rgb or #rrggbb
+            if (clean.startsWith('#')) {
+                let hex = clean.slice(1);
+                if (hex.length === 3) {
+                    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+                }
+                if (hex.length === 6) {
+                    const r = parseInt(hex.slice(0, 2), 16);
+                    const g = parseInt(hex.slice(2, 4), 16);
+                    const b = parseInt(hex.slice(4, 6), 16);
+                    if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
+                        return { r, g, b };
+                    }
+                }
+            }
+            return { r: 255, g: 255, b: 255 };
+        }
+
+        function focusNode(key, colorName) {
+            // Light up core & paths
+            const colorVal = getComputedStyle(document.documentElement).getPropertyValue(`--neon-${colorName}`).trim();
+            const core = document.getElementById('reactorCore');
+            core.style.borderColor = colorVal;
+            core.style.boxShadow = `0 0 30px ${colorVal}`;
+            core.style.color = colorVal;
+            
+            const glowPath = document.getElementById(`path-${key}-glow`);
+            if (glowPath) {
+                glowPath.style.strokeWidth = "5px";
+                glowPath.style.opacity = "1";
+            }
+            
+            // Background canvas behavior (high-performance color update)
+            currentStrokeRgb = parseColorToRgb(colorVal);
+
+            // Audio sweep
+            playSystemBeep(800 + Math.random() * 200, 0.04, 'triangle');
+        }
+
+        function blurNode(key) {
+            // Restore reactor core
+            const core = document.getElementById('reactorCore');
+            core.style.borderColor = "";
+            core.style.boxShadow = "";
+            core.style.color = "";
+
+            const glowPath = document.getElementById(`path-${key}-glow`);
+            if (glowPath) {
+                glowPath.style.strokeWidth = "3px";
+                glowPath.style.opacity = "";
+            }
+
+            // Restore canvas theme
+            currentStrokeRgb = { r: 255, g: 255, b: 255 };
+        }
+
+        // Modal triggers
+        function openModal(category) {
+            playSystemBeep(600, 0.1, 'sawtooth');
+            const overlay = document.getElementById(`modal-${category}`);
+            if (overlay) {
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(category) {
+            playSystemBeep(400, 0.08, 'sine');
+            const overlay = document.getElementById(`modal-${category}`);
+            if (overlay) {
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Close modal when clicking backdrop
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    const category = overlay.id.replace('modal-', '');
+                    closeModal(category);
+                }
+            });
+        });
+
+        // Tab Switching Logic inside Modal
+        function switchTab(category, tabName) {
+            playSystemBeep(900, 0.05, 'sine');
+            const modal = document.getElementById(`modal-${category}`);
+            if (!modal) return;
+
+            const tabs = modal.querySelectorAll('.modal-tab');
+            tabs.forEach(tab => {
+                const isMatch = tab.getAttribute('onclick').includes(tabName);
+                tab.classList.toggle('active', isMatch);
+            });
+
+            const contents = modal.querySelectorAll('.tab-content');
+            contents.forEach(content => {
+                const isMatch = content.id === `tab-${category}-${tabName}`;
+                content.classList.toggle('active', isMatch);
+            });
+        }
+
+        // ==============================================
+        // CANVAS CONSTELLATION INTERACTIVE BG
+        // ==============================================
+        const canvas = document.getElementById('hud-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null };
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+        window.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+                this.radius = Math.random() * 1.5 + 0.5;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+
+                // Gravitate slightly to mouse
+                if (mouse.x && mouse.y) {
+                    const dx = mouse.x - this.x;
+                    const dy = mouse.y - this.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 120) {
+                        this.x += dx * 0.005;
+                        this.y += dy * 0.005;
+                    }
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${currentStrokeRgb.r}, ${currentStrokeRgb.g}, ${currentStrokeRgb.b}, 0.2)`;
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const count = Math.floor((canvas.width * canvas.height) / 16000);
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        }
+        initParticles();
+
+        function drawConnections() {
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 100) {
+                        const alpha = (1 - dist / 100) * 0.05;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(${currentStrokeRgb.r}, ${currentStrokeRgb.g}, ${currentStrokeRgb.b}, ${alpha})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            drawConnections();
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // ==============================================
+        // DYNAMIC SUBMISSIONS LOGIC
+        // ==============================================
+        function handleNewVet(e) {
+            e.preventDefault();
+            playSystemBeep(1200, 0.1, 'sine');
+            const name = document.getElementById('vet-name-input').value;
+            const address = document.getElementById('vet-address-input').value;
+            const schedule = document.getElementById('vet-schedule-input').value;
+
+            const container = document.getElementById('vet-list-container');
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.innerHTML = `
+                <div class="item-info">
+                    <span class="item-name">${name}</span>
+                    <span class="item-meta">${address}</span>
+                </div>
+                <span class="item-status-tag tag-cyan">${schedule}</span>
+            `;
+            container.insertBefore(card, container.firstChild);
+            
+            document.getElementById('add-vet-form').reset();
+            switchTab('veterinarias', 'list');
+        }
+
+        function handleNewAppointment(e) {
+            e.preventDefault();
+            playSystemBeep(1200, 0.1, 'sine');
+            const pet = document.getElementById('appt-pet-input').value;
+            const doctor = document.getElementById('appt-doctor-input').value;
+            const rawDate = document.getElementById('appt-date-input').value;
+
+            const dateObj = new Date(rawDate);
+            const formattedDate = dateObj.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+            const container = document.getElementById('appointment-list-container');
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.innerHTML = `
+                <div class="item-info">
+                    <span class="item-name">${pet}</span>
+                    <span class="item-meta">${formattedDate} // Dr. ${doctor}</span>
+                </div>
+                <span class="item-status-tag tag-violet">Puntual</span>
+            `;
+            container.insertBefore(card, container.firstChild);
+
+            document.getElementById('add-appointment-form').reset();
+            switchTab('citas', 'list');
+        }
+
+        function handleNewPet(e) {
+            e.preventDefault();
+            playSystemBeep(1200, 0.1, 'sine');
+            const name = document.getElementById('pet-name-input').value;
+            const breed = document.getElementById('pet-breed-input').value;
+            const age = document.getElementById('pet-age-input').value;
+
+            const container = document.getElementById('pet-list-container');
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.innerHTML = `
+                <div class="item-info">
+                    <span class="item-name">${name}</span>
+                    <span class="item-meta">${breed} - ${age} Años</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 100%; background-color: var(--neon-pink); box-shadow: 0 0 8px var(--neon-pink);"></div>
+                </div>
+            `;
+            container.insertBefore(card, container.firstChild);
+
+            const select = document.getElementById('appt-pet-input');
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            select.appendChild(option);
+
+            document.getElementById('add-pet-form').reset();
+            switchTab('mascotas', 'list');
+        }
+    </script>
+</body>
+</html>

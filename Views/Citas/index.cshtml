@@ -1,0 +1,214 @@
+@model List<Veterinaria.Models.CitasModel>
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VetConnect - Agenda de Citas</title>
+    
+    <!-- Neon Styles -->
+    <link rel="stylesheet" href="~/css/Citas/index.css" asp-append-version="true" />
+</head>
+<body>
+
+    <!-- CRT visual overlays -->
+    <div class="crt-overlay"></div>
+    <div class="crt-scanline"></div>
+
+    <!-- Background interactive canvas -->
+    <canvas id="hud-canvas"></canvas>
+
+    <!-- Corner HUD brackets -->
+    <div class="hud-frame frame-tl"></div>
+    <div class="hud-frame frame-tr"></div>
+    <div class="hud-frame frame-bl"></div>
+    <div class="hud-frame frame-br"></div>
+
+    <div class="hud-telemetry telemetry-left">DATABASE STATUS: ONLINE // CITAS REGISTERED: @Model.Count</div>
+    <div class="hud-telemetry telemetry-right">VET-CORE SECURITY ENCRYPTED // NODE.CITAS</div>
+
+    <!-- Main Container -->
+    <div class="container">
+        
+        <header class="page-header">
+            <h1>Agenda de Citas</h1>
+            <p>Área de control y citas médicas</p>
+        </header>
+
+        <!-- Form Section -->
+        <section class="form-section">
+            <h2 class="section-title">Nueva Cita</h2>
+            <form asp-action="Agregar" method="post" class="neon-form">
+                <div class="form-group">
+                    <input type="text" name="nombre" placeholder="Mascota" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <input type="text" name="telefono" placeholder="Teléfono" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <input type="email" name="correo" placeholder="Correo" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <input type="text" name="motivo" placeholder="Motivo" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <input type="datetime-local" name="fecha" required>
+                </div>
+                <div class="form-group">
+                    <input type="number" step="0.1" name="peso" placeholder="Peso (kg)" required min="0" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <select name="sexo" required>
+                        <option value="" disabled selected>Sexo</option>
+                        <option value="Macho">Macho</option>
+                        <option value="Hembra">Hembra</option>
+                    </select>
+                </div>
+                <button type="submit" class="neon-btn">Agendar</button>
+            </form>
+        </section>
+
+        <!-- Actions -->
+        <div class="actions-row">
+            <a asp-controller="Home" asp-action="Index" class="btn-back">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 6px; vertical-align: middle;"><polyline points="15 18 9 12 15 6"/></svg>
+                <span style="vertical-align: middle;">Ir al Inicio</span>
+            </a>
+        </div>
+        
+        <!-- Table Section -->
+        <section class="table-section">
+            <h2 class="section-title">Citas Agendadas</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mascota</th>
+                            <th>Teléfono</th>
+                            <th>Correo</th>
+                            <th>Motivo</th>
+                            <th>Fecha</th>
+                            <th>Peso</th>
+                            <th>Sexo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cita in Model)
+                        {
+                            <tr>
+                                <td class="pet-name">@cita.nombre</td>
+                                <td>@cita.telefono</td>
+                                <td>@cita.correo</td>
+                                <td><span class="specie-badge">@cita.motivo</span></td>
+                                <td>@cita.fecha</td>
+                                <td>@cita.peso.ToString("F1") kg</td>
+                                <td>@cita.sexo</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>  
+            </div>
+        </section>
+        
+    </div>
+
+    <!-- Background Particle Script -->
+    <script>
+        const canvas = document.getElementById('hud-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null };
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+        window.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+                this.radius = Math.random() * 1.5 + 0.5;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+
+                if (mouse.x && mouse.y) {
+                    const dx = mouse.x - this.x;
+                    const dy = mouse.y - this.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 120) {
+                        this.x += dx * 0.005;
+                        this.y += dy * 0.005;
+                    }
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = "rgba(189, 0, 255, 0.25)";
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const count = Math.floor((canvas.width * canvas.height) / 16000);
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        }
+        initParticles();
+
+        function drawConnections() {
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 100) {
+                        const alpha = (1 - dist / 100) * 0.06;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(189, 0, 255, ${alpha})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            drawConnections();
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>

@@ -11,7 +11,7 @@ namespace Veterinaria.Data
 
         public DbSet<MascotaModel> Mascotas { get; set; }
         public DbSet<VeterinarioModel> Veterinarios { get; set; }
-        public DbSet<CitaModel> Citas { get; set; }
+        public DbSet<CitasModel> Citas { get; set; }
         public DbSet<SucursalModel> Sucursales { get; set; }
     }
 }

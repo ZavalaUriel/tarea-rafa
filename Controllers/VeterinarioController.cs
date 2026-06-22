@@ -1,16 +1,22 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
+using Veterinaria.Data;
 using Veterinaria.Models;
-using System.Collections.Generic;
+using System.Linq;
 
 namespace Veterinaria.Controllers
 {
     public class VeterinarioController : Controller
     {
-        private static List<VeterinarioModel> veterinarios = new List<VeterinarioModel>();
+        private readonly VeterinariaContext _context;
+
+        public VeterinarioController(VeterinariaContext context)
+        {
+            _context = context;
+        }
 
         public IActionResult Index()
         {
+            var veterinarios = _context.Veterinarios.ToList();
             return View("index", veterinarios);
         }
 
@@ -19,7 +25,8 @@ namespace Veterinaria.Controllers
         {
             if (nuevoVeterinario != null && !string.IsNullOrEmpty(nuevoVeterinario.nombre))
             {
-                veterinarios.Add(nuevoVeterinario);
+                _context.Veterinarios.Add(nuevoVeterinario);
+                _context.SaveChanges();
             }
             return RedirectToAction(nameof(Index));
         }

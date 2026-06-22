@@ -13,21 +13,21 @@ namespace Veterinaria.Controllers
             _context = context;
         }
 
-        public IActionResult Create()
+        public IActionResult Index()
         {
-            return View();
+            var sucursales = _context.Sucursales.ToList();
+            return View("index", sucursales);
         }
 
         [HttpPost]
-        public IActionResult Create(SucursalModel sucursal)
+        public IActionResult Agregar(SucursalModel nuevaSucursal)
         {
-            if (ModelState.IsValid)
+            if (nuevaSucursal != null && !string.IsNullOrEmpty(nuevaSucursal.Nombre))
             {
-                _context.Sucursales.Add(sucursal);
+                _context.Sucursales.Add(nuevaSucursal);
                 _context.SaveChanges();
-                return RedirectToAction("Index", "Home");
             }
-            return View(sucursal);
+            return RedirectToAction(nameof(Index));
         }
     }
 }

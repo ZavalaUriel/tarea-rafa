@@ -1,17 +1,23 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
+using Veterinaria.Data;
 using Veterinaria.Models;
-using System.Collections.Generic;
+using System.Linq;
 
 namespace Veterinaria.Controllers
 {
     public class CitasController : Controller
     {
-        private static List<CitasModel> citas = new List<CitasModel>();
+        private readonly VeterinariaContext _context;
+
+        public CitasController(VeterinariaContext context)
+        {
+            _context = context;
+        }
 
         public IActionResult Index()
         {
-            return View("index", citas);
+            var citasLista = _context.Citas.ToList();
+            return View("index", citasLista);
         }
 
         [HttpPost]
@@ -23,7 +29,8 @@ namespace Veterinaria.Controllers
                 {
                     nuevaCita.fecha = parsedDate.ToString("dd/MM/yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture);
                 }
-                citas.Add(nuevaCita);
+                _context.Citas.Add(nuevaCita);
+                _context.SaveChanges();
             }
             return RedirectToAction(nameof(Index));
         }
